@@ -25,7 +25,7 @@ graphics/           # Diagrams (board indexing scheme)
 ## Getting started
 
 ```bash
-pip install pennylane jax jaxlib optax matplotlib numpy scikit-learn
+pip install pennylane jax jax.numpy optax matplotlib numpy random time
 ```
 
 Then open `tic_tac.ipynb` and run all cells. Training takes a few minutes on CPU.
@@ -43,3 +43,4 @@ Then open `tic_tac.ipynb` and run all cells. Training takes a few minutes on CPU
 
 Meyer, J.J. et al., "Exploiting Symmetry in Variational Quantum Machine Learning",
 PRX Quantum 4, 010328 (2023). arXiv:2205.06217
+
