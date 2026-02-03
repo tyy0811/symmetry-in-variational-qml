@@ -1,47 +1,75 @@
 # Exploiting Symmetry in Variational Quantum Machine Learning
 
-A PennyLane + JAX implementation of the D4-equivariant quantum classifier for tic-tac-toe, reproducing results from:
+A PennyLane + JAX implementation of symmetry-equivariant quantum classifiers, reproducing results from:
 
 > Meyer et al., *Exploiting Symmetry in Variational Quantum Machine Learning*, PRX Quantum **4**, 010328 (2023). [arXiv:2205.06217](https://arxiv.org/abs/2205.06217)
 
 ## Overview
 
-The notebook implements a variational quantum circuit that classifies tic-tac-toe game outcomes (X wins, O wins, draw) using 9 qubits. The key idea is that the tic-tac-toe board has D4 (dihedral) symmetry — rotations and reflections of the square — which partitions the 9 board positions into three equivalence classes: corners, edges, and center. By constraining the circuit to respect this symmetry, the model generalises better with fewer parameters.
+This repository contains two notebooks implementing variational quantum circuits that exploit geometric symmetries to improve generalisation:
 
-| Model | Params | Architecture |
-|-------|--------|-------------|
-| Equivariant | 18 | 9 shared params/layer × 2 layers |
-| Non-equivariant | 68 | 34 independent params/layer × 2 layers |
+| Notebook | Symmetry | Task | Qubits |
+|----------|----------|------|--------|
+| `tic_tac.ipynb` | D₄ (dihedral) | 3-class classification | 9 |
+| `Autonomous_Vehicle_Scenerios_Toy_Model.ipynb` | Z₄ (cyclic) | Regression | 9 |
 
-Both models use the same "cemoid" gate topology (single-qubit RX + RY rotations followed by CRY entangling gates) with data re-uploading at every layer, matching the paper's Figure 3.
+Both use the "cemoid" gate topology (single-qubit RX + RY rotations followed by CRZ entangling gates) with data re-uploading, matching the paper's methodology.
 
-## Repository structure
+---
+
+## Tic-Tac-Toe Classifier
+
+Classifies game outcomes (X wins, O wins, draw) on a 3×3 board. The D₄ symmetry — rotations and reflections of the square — partitions the 9 positions into three equivalence classes: corners, edges, and center.
+
+| Model | Params/block | Architecture |
+|-------|--------------|--------------|
+| Equivariant | 9 | Shared weights across equivalent qubits |
+| Non-equivariant | 34 | Independent params per qubit |
+
+**Dataset:** 450 training / 300 validation samples (balanced classes)
+
+---
+
+## Autonomous Vehicle Scenarios
+
+Predicts decision difficulty (0.0–1.0) for a simplified autonomous vehicle navigating road layouts. The model uses Z₄ symmetry (rotations only, no reflections) because mirroring a left-turn scenario produces a right-turn scenario with different difficulty.
+
+| Model | Params/block | Total (l=3, p=1) |
+|-------|--------------|------------------|
+| Equivariant | 10 | 30 |
+| Non-equivariant | 42 | 126 |
+
+**Scenarios:** Straight roads, corners, T-crossings, and intersections with 6 difficulty levels
+
+**Output:** ŷ = (Z_middle + 1) / 2 (center qubit expectation mapped to [0,1])
+
+---
+
+## Repository Structure
 
 ```
-tic_tac.ipynb       # Main notebook
-graphics/           # Diagrams (board indexing scheme)
+tic_tac.ipynb                              # D₄-equivariant tic-tac-toe classifier
+Autonomous_Vehicle_Scenerios_Toy_Model.ipynb   # Z₄-equivariant vehicle scenario regressor
+graphics/                                  # Diagrams (board indexing, road layouts)
 ```
 
-## Getting started
+## Getting Started
 
 ```bash
-pip install pennylane jax optax
+pip install pennylane jax jaxlib optax numpy matplotlib
 ```
 
-Then open `tic_tac.ipynb` and run all cells. Training takes a few minutes on CPU.
+Then open either notebook and run all cells. Training takes a few minutes on CPU.
 
-## Notebook outline
+## Key Concepts
 
-1. **Game engine** — random tic-tac-toe play and balanced dataset generation (450 training / 300 validation samples)
-2. **D4 symmetry analysis** — group generators, equivalence classes, twirling formula
-3. **Equivariant circuit** — 9 params/layer with shared weights across equivalent qubits
-4. **Non-equivariant circuit** — 34 independent params/layer, same gate topology
-5. **Training** — Adam optimiser, MSE loss, 100 epochs × 30 mini-batches of 15
-6. **Comparison** — validation accuracy and generalisation gap between models
+**Data re-uploading:** Input features are encoded at the start of every layer, not just once. This increases expressivity while maintaining symmetry constraints.
+
+**Equivariant circuits:** Qubits in the same equivalence class (e.g., all corners) share parameters, reducing the parameter count and enforcing that symmetric inputs produce symmetric outputs.
+
+**Generalisation gap:** The difference between training and validation accuracy. Symmetric models show smaller gaps, indicating better generalisation from limited data.
 
 ## Reference
 
 Meyer, J.J. et al., "Exploiting Symmetry in Variational Quantum Machine Learning",
-PRX Quantum 4, 010328 (2023). arXiv:2205.06217
-
-
+PRX Quantum 4, 010328 (2023). [arXiv:2205.06217](https://arxiv.org/abs/2205.06217)
