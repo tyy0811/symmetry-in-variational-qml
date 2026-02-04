@@ -1,19 +1,18 @@
 # Exploiting Symmetry in Variational Quantum Machine Learning
 
-A PennyLane + JAX implementation of symmetry-equivariant quantum classifiers, reproducing results from:
+A PennyLane + JAX implementation of symmetry-equivariant quantum circuits, reproducing results from:
 
-> Meyer et al., *Exploiting Symmetry in Variational Quantum Machine Learning*, PRX Quantum **4**, 010328 (2023). [arXiv:2205.06217](https://arxiv.org/abs/2205.06217)
+> Meyer et al., *Exploiting Symmetry in Variational Quantum Machine Learning*, PRX Quantum **4**, 010328 (2022). [arXiv:2205.06217](https://arxiv.org/abs/2205.06217)
 
 ## Overview
 
-This repository contains two notebooks implementing variational quantum circuits that exploit geometric symmetries to improve generalisation:
+This repository contains three notebooks implementing variational quantum circuits that exploit symmetries to improve generalisation and trainability:
 
 | Notebook | Symmetry | Task | Qubits |
 |----------|----------|------|--------|
 | `tic_tac.ipynb` | D₄ (dihedral) | 3-class classification | 9 |
 | `Autonomous_Vehicle_Scenerios_Toy_Model.ipynb` | Z₄ (cyclic) | Regression | 9 |
-
-Both use the "cemoid" gate topology (single-qubit RX + RY rotations followed by CRZ entangling gates) with data re-uploading, matching the paper's methodology.
+| `transverse-field-ising-model.ipynb` | Z₂ (parity) | Ground State Search (VQE) | Variable (e.g. 10) |
 
 ---
 
@@ -45,12 +44,28 @@ Predicts decision difficulty (0.0–1.0) for a simplified autonomous vehicle nav
 
 ---
 
+## Transverse-Field Ising Model (TFIM)
+
+Solves for the ground state energy of a 1D spin chain using the Variational Quantum Eigensolver (VQE). The Hamiltonian possesses a global $\mathbb{Z}_2$ parity symmetry ($P = \prod X_i$).
+
+| Model | Gates Used | Characteristics |
+|-------|------------|-----------------|
+| Equivariant (QAOA) | RX, ZZ | Preserves parity; avoids barren plateaus at high depth |
+| Non-equivariant (QAOA') | RX, RY, ZZ | Breaks parity via RY; suffers from "false convergence" |
+
+**Experiment:** Compares convergence rates and energy error as circuit depth ($p$) increases.
+
+**Key Finding:** For deep circuits ($p \ge N/2$), the equivariant model reliably reaches the ground state, whereas the non-equivariant model gets stuck in local minima (barren plateaus) due to searching unphysical symmetry sectors.
+
+---
+
 ## Repository Structure
 
 ```
-tic_tac.ipynb                              # D₄-equivariant tic-tac-toe classifier
-Autonomous_Vehicle_Scenerios_Toy_Model.ipynb   # Z₄-equivariant vehicle scenario regressor
-graphics/                                  # Diagrams (board indexing, road layouts)
+tic_tac.ipynb                                  # D₄-equivariant tic-tac-toe classifier
+Autonomous_Vehicle_Scenerios_Toy_Model.ipynb   # Z₄-equivariant vehicle scenario regressor
+transverse-field-ising-model.ipynb             # Z₂-equivariant VQE for TFIM graphics/
+graphics                                       # Diagrams (board indexing, road layouts)
 ```
 
 ## Getting Started
@@ -63,13 +78,17 @@ Then open either notebook and run all cells. Training takes a few minutes on CPU
 
 ## Key Concepts
 
-**Data re-uploading:** Input features are encoded at the start of every layer, not just once. This increases expressivity while maintaining symmetry constraints.
+**Equivariant Circuits:** Constraining the quantum model to respect the symmetry of the problem.
+* **For QML (Geometric Symmetries):** Qubits in the same spatial equivalence class (e.g., all corners of a board) share parameters. This reduces the parameter count and ensures symmetric inputs produce symmetric outputs.
+* **For VQE (Internal Symmetries):** The ansatz is constructed using only gates that commute with the symmetry operator (e.g., $P = \prod X$). This restricts the search to the physical Hilbert space sector (e.g., positive parity), preventing the ansatz from exploring unphysical states.
 
-**Equivariant circuits:** Qubits in the same equivalence class (e.g., all corners) share parameters, reducing the parameter count and enforcing that symmetric inputs produce symmetric outputs.
+**Inductive Bias & Trainability:**
+* **In QML:** Symmetry provides a geometric inductive bias, leading to a smaller **generalisation gap** (the difference between training and validation accuracy), allowing models to learn from less data.
+* **In VQE:** Symmetry acts as a physical inductive bias. It transforms the optimization landscape from a flat **Barren Plateau** (characteristic of non-equivariant models at high depth) into a navigable gorge, allowing the optimizer to converge to the true ground state.
 
-**Generalisation gap:** The difference between training and validation accuracy. Symmetric models show smaller gaps, indicating better generalisation from limited data.
-
+**Data Re-uploading (QML only):** In the classification/regression tasks, input features are encoded at the start of every layer, not just once. This increases expressivity without breaking the symmetry constraints defined by the gate topology.
 ## Reference
 
 Meyer, J.J. et al., "Exploiting Symmetry in Variational Quantum Machine Learning",
-PRX Quantum 4, 010328 (2023). [arXiv:2205.06217](https://arxiv.org/abs/2205.06217)
+PRX Quantum 4, 010328 (2022). [arXiv:2205.06217](https://arxiv.org/abs/2205.06217)
+
