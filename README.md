@@ -6,13 +6,14 @@ A PennyLane + JAX implementation of symmetry-equivariant quantum circuits, repro
 
 ## Overview
 
-This repository contains three notebooks implementing variational quantum circuits that exploit symmetries to improve generalisation and trainability:
+This repository contains four notebooks implementing variational quantum circuits that exploit symmetries to improve generalisation and trainability:
 
 | Notebook | Symmetry | Task | Qubits |
 |----------|----------|------|--------|
 | `tic_tac.ipynb` | D₄ (dihedral) | 3-class classification | 9 |
 | `Autonomous_Vehicle_Scenerios_Toy_Model.ipynb` | Z₄ (cyclic) | Regression | 9 |
 | `transverse-field-ising-model.ipynb` | Z₂ (parity) | Ground State Search (VQE) | Variable (e.g. 10) |
+| `heisenberg-model.ipynb` | SU(2) (spin) | Ground State Search (VQE) | Variable (e.g. 10) |
 
 ---
 
@@ -59,13 +60,29 @@ Solves for the ground state energy of a 1D spin chain using the Variational Quan
 
 ---
 
+## Heisenberg Model
+
+Solves for the ground state of the isotropic 1D Heisenberg model. The system possesses continuous $SU(2)$ symmetry (conservation of total spin).
+
+| Model | Params/layer | Characteristics |
+|-------|------------|-----------------|
+| Equivariant | 2 | Uses isotropic exchange gates $e^{-i\theta(XX+YY+ZZ)}$. Preserves singlet state ($S_{tot}=0$). |
+| Non-equivariant | 7 | Uses anisotropic gates and local $Y$ rotations. Breaks spin symmetry. |
+
+**Experiment:** Compares convergence rates and energy error as circuit depth ($p$) increases.
+
+**Key Finding:** The non-equivariant ansatz ($7p$ params) suffers from severe barren plateaus due to the vastness of the Hilbert space. The equivariant ansatz ($2p$ params), strictly constrained to the singlet subspace, converges rapidly to the ground state precision ($\sim 10^{-5}$) across all circuit depths.
+
+---
+
 ## Repository Structure
 
 ```
 tic_tac.ipynb                                  # D₄-equivariant tic-tac-toe classifier
 Autonomous_Vehicle_Scenerios_Toy_Model.ipynb   # Z₄-equivariant vehicle scenario regressor
-transverse-field-ising-model.ipynb             # Z₂-equivariant VQE for TFIM graphics/
-graphics                                       # Diagrams (board indexing, road layouts)
+transverse-field-ising-model.ipynb             # Z₂-equivariant VQE for TFIM 
+heisenberg-model.ipynb                         # SU(2)-equivariant VQE for Heisenberg Model
+graphics/                                      # Diagrams (board indexing, road layouts)
 ```
 
 ## Getting Started
@@ -91,4 +108,5 @@ Then open either notebook and run all cells. Training takes a few minutes on CPU
 
 Meyer, J.J. et al., "Exploiting Symmetry in Variational Quantum Machine Learning",
 PRX Quantum 4, 010328 (2022). [arXiv:2205.06217](https://arxiv.org/abs/2205.06217)
+
 
