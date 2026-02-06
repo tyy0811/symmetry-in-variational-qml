@@ -82,6 +82,7 @@ tic_tac.ipynb                                  # D₄-equivaria
 Autonomous_Vehicle_Scenerios_Toy_Model.ipynb   # Z₄-equivariant vehicle scenario regressor
 transverse-field-ising-model.ipynb             # Z₂-equivariant VQE for TFIM 
 heisenberg-model.ipynb                         # SU(2)-equivariant VQE for Heisenberg Model
+utils.py                                       # Shared VQE optimization and plotting logic 
 graphics/                                      # Diagrams (board indexing, road layouts)
 ```
 
@@ -108,5 +109,6 @@ Then open either notebook and run all cells. Training takes a few minutes on CPU
 
 Meyer, J.J. et al., "Exploiting Symmetry in Variational Quantum Machine Learning",
 PRX Quantum 4, 010328 (2022). [arXiv:2205.06217](https://arxiv.org/abs/2205.06217)
+
 
 
